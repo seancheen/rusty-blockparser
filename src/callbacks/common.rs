@@ -33,13 +33,10 @@ pub fn insert_unspents(
 ) -> u64 {
     let mut count = 0;
     for (i, output) in tx.value.outputs.iter().enumerate() {
-        if block_height == 91842{
-            println!("output {}",&output.out.value);
-        }
         match &output.script.address {
             Some(address) => {
                 if block_height == 91842{
-                    println!(" Some(address) {}",address);
+                    println!("{} Some(address) {} {} BTC",tx.hash,address,&output.out.value);
                 }
                 let unspent = UnspentValue {
                     block_height,
@@ -52,9 +49,6 @@ pub fn insert_unspents(
                 count += 1;
             }
             None => {
-                if block_height == 91842{
-                    println!(" None(address)",);
-                }
                 debug!(
                     target: "callback", "Ignoring invalid utxo in: {} ({})",
                     &tx.hash,
