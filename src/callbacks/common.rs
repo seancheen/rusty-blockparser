@@ -39,7 +39,7 @@ pub fn insert_unspents(
         match &output.script.address {
             Some(address) => {
                 if block_height == 91842{
-                    println!(" Some(address)",);
+                    println!(" Some(address) {}",address);
                 }
                 let unspent = UnspentValue {
                     block_height,
