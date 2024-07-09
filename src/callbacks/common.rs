@@ -50,9 +50,12 @@ pub fn insert_unspents(
             address: bytes_to_hex_string(&output.out.script_pubkey),
             value: output.out.value,
         };
-        new_value += unspent.value;
+
 
         let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
+        if !unspents.contains_key(&key) {
+            new_value += unspent.value;
+        }
         unspents.insert(key, unspent);
         count += 1;
     }
