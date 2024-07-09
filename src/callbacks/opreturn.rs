@@ -37,15 +37,15 @@ impl Callback for OpReturn {
             for out in tx.value.outputs.iter() {
                 if let ScriptPattern::OpReturn(data) = &out.script.pattern {
                     if out.out.value > 0 {
-                    println!("height: {: <9}    op_return_burned: {}",block_height, out.out.value ); 
-                }
+                    println!("height: {: <9}  txid: {}  op_return_burned: {}",block_height,&tx.hash, out.out.value ); 
+                    }
                     if data.is_empty() {
                         continue;
                     }
-                    println!(
-                        "height: {: <9} txid: {}    data: {}",
-                        block_height, &tx.hash, data
-                    );
+                    // println!(
+                    //     "height: {: <9} txid: {}    data: {}",
+                    //     block_height, &tx.hash, data
+                    // );
                      
                 }
               
