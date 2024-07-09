@@ -50,7 +50,6 @@ pub fn insert_unspents(
         let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
         unspents.insert(key, unspent);
         count += 1;
-        println!("block_height={} count={}",block_height,unspents.len())
     }
     count
 }

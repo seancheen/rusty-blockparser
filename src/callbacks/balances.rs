@@ -74,8 +74,11 @@ impl Callback for Balances {
     ///   * address
     fn on_block(&mut self, block: &Block, block_height: u64) -> OpResult<()> {
         for tx in &block.txs {
+            println!("remove_unspents before: block={} unspent={}",block_height,self.unspents.len());
             common::remove_unspents(tx, &mut self.unspents);
+            println!("remove_unspents after: block={} unspent={}",block_height,self.unspents.len());
             common::insert_unspents(tx, block_height, &mut self.unspents);
+            println!("insert_unspents after: block={} unspent={}",block_height,self.unspents.len());
         }
         Ok(())
     }
