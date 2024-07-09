@@ -33,37 +33,22 @@ pub fn insert_unspents(
 ) -> u64 {
     let mut count = 0;
     for (i, output) in tx.value.outputs.iter().enumerate() {
-        match &output.script.address {
-            Some(address) => {
-                let unspent = UnspentValue {
-                    block_height,
-                    address: address.clone(),
-                    value: output.out.value,
-                };
+        let address = match &output.script.address {
+            Some(addr) if !addr.is_empty() => addr.clone(),
+            _ => "nulladdr".to_string(),
+        };
 
-                let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
-                unspents.insert(key, unspent);
-                count += 1;
-            }
-            None => {
-                debug!(
-                    target: "callback", "Ignoring invalid utxo in: {} ({})",
-                    &tx.hash,
-                    output.script.pattern
-                );
-                let unknown_address = output.script.pattern.to_string();
-                let unspent = UnspentValue {
-                    block_height,
-                    address: unknown_address,
-                    value: output.out.value,
-                };
+        let unspent = UnspentValue {
+            block_height,
+            address,
+            value: output.out.value,
+        };
 
-                let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
-                unspents.insert(key, unspent);
-                count += 1;
-            }
-        }
+        let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
+        unspents.insert(key, unspent);
+        count += 1;
     }
+    count
     count
 }
 
