@@ -87,11 +87,20 @@ impl Callback for Balances {
     ///   * output_val
     ///   * address
     fn on_block(&mut self, block: &Block, block_height: u64) -> OpResult<()> {
+        let mut in_v = 0;
+        let mut out_v = 0;
+        let b_reward = block_reward(block_height);
         for tx in &block.txs {
             let  (_in_count, spent_value) = common::remove_unspents(tx, &mut self.unspents);
             let (_count,new_value) = common::insert_unspents(tx, block_height, &mut self.unspents);
-            self.lost_value += block_reward(block_height) + spent_value - new_value
+            in_v += spent_value;
+            out_v += new_value;
         }
+        let lost = b_reward + in_v - out_v;
+        if lost > 0{
+            println!("block {} lost {} sat",block_height,lost);
+        }
+        self.lost_value +=lost;
         Ok(())
     }
 
