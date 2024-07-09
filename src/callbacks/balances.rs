@@ -23,7 +23,7 @@ pub struct Balances {
 }
 
 fn block_reward(height: u64) -> u64 {
-    let initial_reward = 50;
+    let initial_reward = 50*10000000;
 
     let halving_interval = 210000;
 
