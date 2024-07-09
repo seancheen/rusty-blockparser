@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use bitcoin::hashes::hex;
 
 use crate::blockchain::proto::tx::EvaluatedTx;
 use crate::blockchain::proto::tx::TxOutpoint;
@@ -32,6 +31,7 @@ fn bytes_to_hex_string(bytes: &[u8]) -> String {
 
     hex_chars.join("") // 连接所有的十六进制字符
 }
+
 /// Iterates over transaction outputs and adds valid unspents to HashMap.
 /// Returns the total number of valid outputs.
 pub fn insert_unspents(
@@ -41,16 +41,16 @@ pub fn insert_unspents(
 ) -> u64 {
     let mut count = 0;
     for (i, output) in tx.value.outputs.iter().enumerate() {
-
         let unspent = UnspentValue {
-                block_height,
-                address: bytes_to_hex_string(&output.out.script_pubkey),
-                value: output.out.value,
-            };
+            block_height,
+            address: bytes_to_hex_string(&output.out.script_pubkey),
+            value: output.out.value,
+        };
 
-            let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
-            unspents.insert(key, unspent);
-            count += 1;
+        let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
+        unspents.insert(key, unspent);
+        count += 1;
+        println!("block_height={} count={}",block_height,count)
     }
     count
 }
