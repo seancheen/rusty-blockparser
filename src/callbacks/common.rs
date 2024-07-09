@@ -51,6 +51,16 @@ pub fn insert_unspents(
                     &tx.hash,
                     output.script.pattern
                 );
+                let unknownAddress = output.script.pattern.to_string();
+                let unspent = UnspentValue {
+                    block_height,
+                    address: unknownAddress,
+                    value: output.out.value,
+                };
+
+                let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
+                unspents.insert(key, unspent);
+                count += 1;
             }
         }
     }
