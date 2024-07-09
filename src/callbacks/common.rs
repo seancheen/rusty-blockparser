@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use bitcoin::hashes::hex;
 
 use crate::blockchain::proto::tx::EvaluatedTx;
 use crate::blockchain::proto::tx::TxOutpoint;
@@ -24,6 +25,13 @@ pub fn remove_unspents(
     tx.value.in_count.value
 }
 
+fn bytes_to_hex_string(bytes: &[u8]) -> String {
+    let hex_chars: Vec<String> = bytes.iter()
+        .map(|byte| format!("{:02x}", byte)) // 格式化每个字节为两位十六进制
+        .collect();
+
+    hex_chars.join("") // 连接所有的十六进制字符
+}
 /// Iterates over transaction outputs and adds valid unspents to HashMap.
 /// Returns the total number of valid outputs.
 pub fn insert_unspents(
@@ -33,39 +41,16 @@ pub fn insert_unspents(
 ) -> u64 {
     let mut count = 0;
     for (i, output) in tx.value.outputs.iter().enumerate() {
-        match &output.script.address {
-            Some(address) => {
-                if block_height == 91842{
-                    println!("{} Some(address) {} {} BTC",tx.hash,address,&output.out.value);
-                }
-                let unspent = UnspentValue {
-                    block_height,
-                    address: address.clone(),
-                    value: output.out.value,
-                };
 
-                let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
-                unspents.insert(key, unspent);
-                count += 1;
-            }
-            None => {
-                debug!(
-                    target: "callback", "Ignoring invalid utxo in: {} ({})",
-                    &tx.hash,
-                    output.script.pattern
-                );
-                let unknown_address = output.script.pattern.to_string();
-                let unspent = UnspentValue {
-                    block_height,
-                    address: unknown_address,
-                    value: output.out.value,
-                };
+        let unspent = UnspentValue {
+                block_height,
+                address: bytes_to_hex_string(&output.out.script_pubkey),
+                value: output.out.value,
+            };
 
-                let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
-                unspents.insert(key, unspent);
-                count += 1;
-            }
-        }
+            let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
+            unspents.insert(key, unspent);
+            count += 1;
     }
     count
 }
