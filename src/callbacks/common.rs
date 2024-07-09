@@ -48,6 +48,14 @@ pub fn insert_unspents(
         };
 
         let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
+        if block_height == 91842{
+            let contains = unspents.contains_key(&key);
+            if contains{
+                let option = unspents.get(&key);
+                let x = option.unwrap();
+                println!("option  block={} address={} value={}", x.block_height,x.address,x.value);
+            }
+        }
         unspents.insert(key, unspent);
         count += 1;
     }
