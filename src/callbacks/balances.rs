@@ -98,9 +98,8 @@ impl Callback for Balances {
             println!("block {} spent_value {} new_value {}",block_height,spent_value,new_value);
         }
         let lost = b_reward + in_v - out_v;
-        if lost > 0 {
-            println!("block {} lost {} sat",block_height,lost);
-        }
+        println!("block {} b_reward {} in_v {} out_v {} lost {}",block_height,b_reward,in_v,out_v,lost);
+
         self.lost_value +=lost;
         Ok(())
     }
