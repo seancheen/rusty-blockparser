@@ -95,9 +95,10 @@ impl Callback for Balances {
             let (_count,new_value) = common::insert_unspents(tx, block_height, &mut self.unspents);
             in_v += spent_value;
             out_v += new_value;
+            println!("block {} spent_value {} new_value {}",block_height,spent_value,new_value);
         }
         let lost = b_reward + in_v - out_v;
-        if lost > 0{
+        if lost > 0 {
             println!("block {} lost {} sat",block_height,lost);
         }
         self.lost_value +=lost;
