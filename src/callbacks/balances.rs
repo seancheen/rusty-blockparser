@@ -23,7 +23,7 @@ pub struct Balances {
 }
 
 fn block_reward(height: u64) -> u64 {
-    let initial_reward = 50*10000000;
+    let initial_reward = 50 * 100000000;
 
     let halving_interval = 210000;
 
@@ -95,10 +95,11 @@ impl Callback for Balances {
             let (_count, new_value) = common::insert_unspents(tx, block_height, &mut self.unspents);
             in_v += spent_value as i64;
             out_v += new_value as i64;
-            println!("block {} spent_value {} new_value {}", block_height, spent_value, new_value);
         }
         let lost = b_reward + in_v - out_v;
-        println!("block {} b_reward {} in_v {} out_v {} lost {}", block_height, b_reward, in_v, out_v, lost);
+        if lost > 0 {
+            println!("block {} b_reward {} in_v {} out_v {} lost {}", block_height, b_reward, in_v, out_v, lost);
+        }
 
         self.lost_value += lost as u64; // 如果 self.lost_value 仍然是 u64 类型
         Ok(())
