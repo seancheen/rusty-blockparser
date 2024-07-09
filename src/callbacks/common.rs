@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::collections::HashMap;
 
 use crate::blockchain::proto::tx::EvaluatedTx;
@@ -38,17 +39,23 @@ pub fn insert_unspents(
             _ => "nulladdr".to_string(),
         };
 
+                 println!(
+                        "height: {: <9} txid: {}  address: {}",
+                         block_height, tx.hash, address
+                    );
+
         let unspent = UnspentValue {
             block_height,
             address,
             value: output.out.value,
         };
 
+
+
         let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
         unspents.insert(key, unspent);
         count += 1;
     }
-    count
     count
 }
 

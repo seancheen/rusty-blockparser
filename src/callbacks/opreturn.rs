@@ -32,9 +32,11 @@ impl Callback for OpReturn {
     }
 
     fn on_block(&mut self, block: &Block, block_height: u64) -> OpResult<()> {
+        let mut op_return_burned =0;
         for tx in &block.txs {
             for out in tx.value.outputs.iter() {
                 if let ScriptPattern::OpReturn(data) = &out.script.pattern {
+                   
                     if data.is_empty() {
                         continue;
                     }
@@ -42,9 +44,11 @@ impl Callback for OpReturn {
                         "height: {: <9} txid: {}    data: {}",
                         block_height, &tx.hash, data
                     );
+                    op_return_burned +=  out.out.value;
                 }
             }
         }
+        println!("height: {: <9}    op_return_burned: {}",block_height, op_return_burned);
         Ok(())
     }
 
