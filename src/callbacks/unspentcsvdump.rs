@@ -80,7 +80,8 @@ impl Callback for UnspentCsvDump {
     ///   * address
     fn on_block(&mut self, block: &Block, block_height: u64) -> OpResult<()> {
         for tx in &block.txs {
-            self.in_count += common::remove_unspents(tx, &mut self.unspents);
+            let (in_count, spent_value) = common::remove_unspents(tx, &mut self.unspents);
+            self.in_count += in_count;
             self.out_count += common::insert_unspents(tx, block_height, &mut self.unspents);
         }
         self.tx_count += block.tx_count.value;

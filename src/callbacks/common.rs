@@ -16,12 +16,16 @@ pub struct UnspentValue {
 pub fn remove_unspents(
     tx: &Hashed<EvaluatedTx>,
     unspents: &mut HashMap<Vec<u8>, UnspentValue>,
-) -> u64 {
+) -> (u64,u64) {
+    let mut spent_value = 0;
     for input in &tx.value.inputs {
         let key = input.outpoint.to_bytes();
-        unspents.remove(&key);
+        let removed = unspents.remove(&key);
+        if let Some(unspent) = unspents.remove(&key) {
+            spent_value += unspent.value;
+        }
     }
-    tx.value.in_count.value
+    (tx.value.in_count.value,spent_value)
 }
 
 fn bytes_to_hex_string(bytes: &[u8]) -> String {
@@ -40,22 +44,16 @@ pub fn insert_unspents(
     unspents: &mut HashMap<Vec<u8>, UnspentValue>,
 ) -> u64 {
     let mut count = 0;
+    let mut new_value = 0;
     for (i, output) in tx.value.outputs.iter().enumerate() {
         let unspent = UnspentValue {
             block_height,
             address: bytes_to_hex_string(&output.out.script_pubkey),
             value: output.out.value,
         };
+        new_value += unspent.value;
 
         let key = TxOutpoint::new(tx.hash, i as u32).to_bytes();
-        if block_height == 91842{
-            let contains = unspents.contains_key(&key);
-            if contains{
-                let option = unspents.get(&key);
-                let x = option.unwrap();
-                println!("option  block={} address={} value={}", x.block_height,x.address,x.value);
-            }
-        }
         unspents.insert(key, unspent);
         count += 1;
     }

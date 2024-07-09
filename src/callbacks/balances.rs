@@ -16,9 +16,22 @@ pub struct Balances {
 
     // key: txid + index
     unspents: HashMap<Vec<u8>, common::UnspentValue>,
+    lost_value: u64,
 
     start_height: u64,
     end_height: u64,
+}
+
+fn block_reward(height: u64) -> u64 {
+    let initial_reward = 50;
+
+    let halving_interval = 210000;
+
+    let halvings = height / halving_interval;
+
+    let reward = initial_reward >> halvings;
+
+    reward
 }
 
 impl Balances {
@@ -55,6 +68,7 @@ impl Callback for Balances {
             unspents: HashMap::with_capacity(10000000),
             start_height: 0,
             end_height: 0,
+            lost_value: 0,
         };
         Ok(cb)
     }
@@ -74,14 +88,13 @@ impl Callback for Balances {
     ///   * address
     fn on_block(&mut self, block: &Block, block_height: u64) -> OpResult<()> {
         for tx in &block.txs {
-            println!("remove_unspents before: block={} unspent={}",block_height,self.unspents.len());
-            common::remove_unspents(tx, &mut self.unspents);
-            println!("remove_unspents after: block={} unspent={}",block_height,self.unspents.len());
-            common::insert_unspents(tx, block_height, &mut self.unspents);
-            println!("insert_unspents after: block={} unspent={}",block_height,self.unspents.len());
+            let  (in_count, spent_value) = common::remove_unspents(tx, &mut self.unspents);
+            let new_value = common::insert_unspents(tx, block_height, &mut self.unspents);
+            self.lost_value += (block_reward(block_height) + spent_value - new_value)
         }
         Ok(())
     }
+
 
     fn on_complete(&mut self, block_height: u64) -> OpResult<()> {
         self.end_height = block_height;
@@ -111,6 +124,7 @@ impl Callback for Balances {
         .expect("Unable to rename tmp file!");
 
         info!(target: "callback", "Done.\nDumped {} addresses.", balances.len());
+        println!("lost_value: {}",self.lost_value);
         Ok(())
     }
 }
