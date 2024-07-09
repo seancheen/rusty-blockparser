@@ -51,10 +51,10 @@ pub fn insert_unspents(
                     &tx.hash,
                     output.script.pattern
                 );
-                let unknownAddress = output.script.pattern.to_string();
+                let unknown_address = output.script.pattern.to_string();
                 let unspent = UnspentValue {
                     block_height,
-                    address: unknownAddress,
+                    address: unknown_address,
                     value: output.out.value,
                 };
 
