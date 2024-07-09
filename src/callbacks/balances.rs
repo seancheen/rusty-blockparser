@@ -87,20 +87,20 @@ impl Callback for Balances {
     ///   * output_val
     ///   * address
     fn on_block(&mut self, block: &Block, block_height: u64) -> OpResult<()> {
-        let mut in_v = 0;
-        let mut out_v = 0;
-        let b_reward = block_reward(block_height);
+        let mut in_v: i64 = 0;
+        let mut out_v: i64 = 0;
+        let b_reward: i64 = block_reward(block_height) as i64;
         for tx in &block.txs {
-            let  (_in_count, spent_value) = common::remove_unspents(tx, &mut self.unspents);
-            let (_count,new_value) = common::insert_unspents(tx, block_height, &mut self.unspents);
-            in_v += spent_value;
-            out_v += new_value;
-            println!("block {} spent_value {} new_value {}",block_height,spent_value,new_value);
+            let (_in_count, spent_value) = common::remove_unspents(tx, &mut self.unspents);
+            let (_count, new_value) = common::insert_unspents(tx, block_height, &mut self.unspents);
+            in_v += spent_value as i64;
+            out_v += new_value as i64;
+            println!("block {} spent_value {} new_value {}", block_height, spent_value, new_value);
         }
         let lost = b_reward + in_v - out_v;
-        println!("block {} b_reward {} in_v {} out_v {} lost {}",block_height,b_reward,in_v,out_v,lost);
+        println!("block {} b_reward {} in_v {} out_v {} lost {}", block_height, b_reward, in_v, out_v, lost);
 
-        self.lost_value +=lost;
+        self.lost_value += lost as u64; // 如果 self.lost_value 仍然是 u64 类型
         Ok(())
     }
 
