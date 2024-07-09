@@ -88,9 +88,9 @@ impl Callback for Balances {
     ///   * address
     fn on_block(&mut self, block: &Block, block_height: u64) -> OpResult<()> {
         for tx in &block.txs {
-            let  (in_count, spent_value) = common::remove_unspents(tx, &mut self.unspents);
-            let new_value = common::insert_unspents(tx, block_height, &mut self.unspents);
-            self.lost_value += (block_reward(block_height) + spent_value - new_value)
+            let  (_in_count, spent_value) = common::remove_unspents(tx, &mut self.unspents);
+            let (_count,new_value) = common::insert_unspents(tx, block_height, &mut self.unspents);
+            self.lost_value += block_reward(block_height) + spent_value - new_value
         }
         Ok(())
     }

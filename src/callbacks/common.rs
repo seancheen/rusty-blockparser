@@ -20,7 +20,6 @@ pub fn remove_unspents(
     let mut spent_value = 0;
     for input in &tx.value.inputs {
         let key = input.outpoint.to_bytes();
-        let removed = unspents.remove(&key);
         if let Some(unspent) = unspents.remove(&key) {
             spent_value += unspent.value;
         }
@@ -42,7 +41,7 @@ pub fn insert_unspents(
     tx: &Hashed<EvaluatedTx>,
     block_height: u64,
     unspents: &mut HashMap<Vec<u8>, UnspentValue>,
-) -> u64 {
+) -> (u64,u64) {
     let mut count = 0;
     let mut new_value = 0;
     for (i, output) in tx.value.outputs.iter().enumerate() {
@@ -57,7 +56,7 @@ pub fn insert_unspents(
         unspents.insert(key, unspent);
         count += 1;
     }
-    count
+    (count,new_value)
 }
 
 #[cfg(test)]
