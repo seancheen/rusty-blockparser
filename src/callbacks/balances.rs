@@ -9,6 +9,10 @@ use crate::blockchain::proto::block::Block;
 use crate::callbacks::{common, Callback};
 use crate::errors::OpResult;
 
+use std::fs::OpenOptions;
+use std::error::Error;
+use csv::WriterBuilder;
+
 /// Dumps all addresses with non-zero balance in a csv file
 pub struct Balances {
     dump_folder: PathBuf,
@@ -32,6 +36,19 @@ fn block_reward(height: u64) -> u64 {
     let reward = initial_reward >> halvings;
 
     reward
+}
+
+fn write_to_csv(block_height: u64, b_reward: i64, in_v: i64, out_v: i64, lost: i64) -> Result<(), Box<dyn Error>> {
+    let file = OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open("output.csv")?;
+
+    let mut wtr = WriterBuilder::new().has_headers(false).from_writer(file);
+    wtr.write_record(&[block_height.to_string(), b_reward.to_string(), in_v.to_string(), out_v.to_string(), lost.to_string()])?;
+    wtr.flush()?;
+
+    Ok(())
 }
 
 impl Balances {
@@ -99,11 +116,16 @@ impl Callback for Balances {
         let lost = b_reward + in_v - out_v;
         if lost > 0 {
             println!("block {} b_reward {} in_v {} out_v {} lost {}", block_height, b_reward, in_v, out_v, lost);
+            if let Err(err) = write_to_csv(block_height, b_reward, in_v, out_v, lost) {
+                eprintln!("Failed to write to CSV: {}", err);
+            }
         }
 
         self.lost_value += lost as u64; // 如果 self.lost_value 仍然是 u64 类型
         Ok(())
     }
+
+
 
 
     fn on_complete(&mut self, block_height: u64) -> OpResult<()> {
